@@ -17,5 +17,3 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', function () {
     return view('welcome');
 });
-Route::get('/parse-rss', [RSSController::class, 'parse'])->name('parse_rss');
-

@@ -8,6 +8,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Redmine\Client\NativeCurlClient;
@@ -65,23 +66,30 @@ class CreateRedmineIssue implements ShouldQueue
                 $redmineTaskId = $createdIssue->id;
                 $redmineTaskUrl = $this->redmineUrl . '/issues/' . $redmineTaskId;
 
-                $message = "Новая задача создана!\n\n";
+                $message = $subject."\n\n";
                 $message .= "Номер задачи: " . $redmineTaskId . "\n";
                 $message .= "URL задачи: " . $redmineTaskUrl;
                 try {
                     $telegram = new Api($this->botToken);
-                    $telegram->sendMessage([
+                    $telegramMessage = $telegram->sendMessage([
                         'chat_id' => $this->chatId,
                         'text' => $message,
+                    ]);
+
+                    Log::create([
+                        'redmine_task_url' => $redmineTaskUrl,
+                        'telegram_message_id' => $telegramMessage->messageId,
+                        'create_date' => $createdIssue->created_on,
+                        'sent_date' => $telegramMessage->date
                     ]);
                 } catch (\Exception $e) {
                     throw new \Exception('Ошибка при отправке сообщений: ' . $e->getMessage());
                 }
 
-
             } else return null;
         } catch (\Exception $e) {
             Storage::put('xml/' . date('Y-m-d_h-i-s') . '.xml', $redmine->getLastResponseBody());
+            Log::error($e);
             throw new \Exception($e, 'REDMINE SERVICE: Ошибка при создании задачи: ' . $e->getMessage());
         }
     }

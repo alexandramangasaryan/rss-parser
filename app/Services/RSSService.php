@@ -44,37 +44,32 @@ class RSSService
         $substrTitle = strstr($title, '"');
         $programTitle = substr($substrTitle, 0, strrpos ($substrTitle, '"'));
 
-        $settingExists = Setting::where('program_title', $programTitle)->first();
-
-        if (!$settingExists) {
-            Validator::make([$title, $link, $pubDate, $guid], [
-                'title' => 'string',
-                'link' => 'string',
-                'pub_date' => 'date',
-                'guid' => 'string',
-            ])->validate();
-
+        $existingRss = Rss::where('guid', $guid)->first();
+        if (!$existingRss) {
             Rss::create([
                 'title' => $programTitle,
                 'link' => $link,
                 'pub_date' => $pubDate,
                 'guid' => $guid,
             ]);
-        } else {
-            $data = [];
 
-            $data['subject'] = $title;
-            CreateRedmineIssue::dispatch(
-                $settingExists->redmine_url,
-                $settingExists->redmine_api_key,
-                $settingExists->redmine_project_id,
-                $settingExists->telegram_bot_token,
-                $settingExists->telegram_chat_id,
-                $data
-            );
+            $settingExists = Setting::where('program_title', $programTitle)->first();
+            if ($settingExists) {
+                $data = [];
 
-            return ['message' => 'Rss successfully parsed'];
+                $data['subject'] = $title;
+                CreateRedmineIssue::dispatch(
+                    $settingExists->redmine_url,
+                    $settingExists->redmine_api_key,
+                    $settingExists->redmine_project_id,
+                    $settingExists->telegram_bot_token,
+                    $settingExists->telegram_chat_id,
+                    $data
+                );
+            }
         }
+
+        return ['message' => 'Rss successfully parsed'];
     }
 
 }

@@ -13,9 +13,7 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule): void
     {
-        $schedule->call(function () {
-            RSSController::parse();
-        })->everyMinute();
+        $schedule->command('rss:parse')->everyMinute();
     }
 
     /**

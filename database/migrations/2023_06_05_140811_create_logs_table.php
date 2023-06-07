@@ -13,7 +13,6 @@ return new class extends Migration
     {
         Schema::create('logs', function (Blueprint $table) {
             $table->id();
-            $table->foreign('id')->references('id')->on('settings');
             $table->string('redmine_task_url');
             $table->string('telegram_message_id');
             $table->timestamp('create_date');
