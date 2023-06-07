@@ -13,10 +13,10 @@ return new class extends Migration
     {
         Schema::create('rsses', function (Blueprint $table) {
             $table->id();
-            $table->string('title');
-            $table->string('link');
-            $table->date('pub_date');
-            $table->string('guid');
+            $table->string('title')->nullable();
+            $table->string('link')->nullable();
+            $table->date('pub_date')->nullable();
+            $table->string('guid')->nullable();
             $table->timestamps();
         });
     }
