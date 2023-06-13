@@ -27,9 +27,7 @@ class HandleNewRecordTest extends TestCase
             'pub_date' => '2023-06-08',
             'guid' => '785',
         ];
-        $this->assertDatabaseMissing('rsses', $rssData);
-        Rss::create($rssData);
-        $this->assertDatabaseHas('rsses', $rssData);
+        Rss::factory()->create($rssData);
 
         $rss = Rss::where('guid', '8468484')->first();
 

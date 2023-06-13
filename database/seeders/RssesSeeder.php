@@ -28,8 +28,6 @@ class RssesSeeder extends Seeder
             ]
         ];
 
-        foreach ($rsses as $rss) {
-            Rss::insert($rss);
-        }
+        Rss::insert($rsses);
     }
 }

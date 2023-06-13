@@ -32,8 +32,6 @@ class SettingsSeeder extends Seeder
             ]
         ];
 
-        foreach ($settings as $setting) {
-            Setting::insert($setting);
-        }
+        Setting::insert($settings);
     }
 }
