@@ -2,6 +2,7 @@
 
 namespace App\Jobs;
 
+use App\Services\Redmine\Client;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -11,7 +12,6 @@ use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
-use Redmine\Client\NativeCurlClient;
 use Telegram\Bot\Api;
 
 class CreateRedmineIssue implements ShouldQueue
@@ -24,6 +24,7 @@ class CreateRedmineIssue implements ShouldQueue
     protected $botToken;
     protected $chatId;
     protected $data;
+
     /**
      * Create a new job instance.
      */
@@ -43,17 +44,18 @@ class CreateRedmineIssue implements ShouldQueue
      */
     public function handle()
     {
-        $redmine = new NativeCurlClient($this->redmineUrl, $this->apiKey);
+        $redmine = new Client($this->redmineUrl, $this->apiKey);
 
         $subject = Str::replace('[[SKIP]]', 'Не указано', (isset($this->data['subject']) ? $this->data['subject'] : null));
         $description = Str::replace('[[SKIP]]', 'Не указано', (isset($this->data['description']) ? $this->data['description'] : null));
         $customFields = isset($this->data['custom_fields']) ? $this->data['custom_fields'] : [];
-
         try {
             $createdIssue = $redmine->getApi('issue')->create([
                 'project_id' => $this->projectId,
                 'subject' => $subject,
                 'description' => $description,
+                'tracker' => '2',
+                'status' => '1',
                 'custom_fields' => $customFields,
             ]);
 
@@ -83,14 +85,14 @@ class CreateRedmineIssue implements ShouldQueue
                         'sent_date' => $telegramMessage->date
                     ]);
                 } catch (\Exception $e) {
-                    throw new \Exception('Ошибка при отправке сообщений: ' . $e->getMessage());
+                    throw new \Exception('Ошибка при отправке сообщений: ' . $e->getMessage(), 0);
                 }
 
             } else return null;
         } catch (\Exception $e) {
             Storage::put('xml/' . date('Y-m-d_h-i-s') . '.xml', $redmine->getLastResponseBody());
             Log::error($e);
-            throw new \Exception($e, 'REDMINE SERVICE: Ошибка при создании задачи: ' . $e->getMessage());
+            throw new \Exception('REDMINE SERVICE: Ошибка при создании задачи: ' . $e->getMessage(), 0);
         }
     }
 }

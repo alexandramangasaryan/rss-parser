@@ -14,7 +14,7 @@ class RssProcessTest extends TestCase
      * @runInSeparateProcess
      * @preserveGlobalState disabled
      */
-    public function test_example(): void
+    public function testRssProcess(): void
     {
         $feedMock = Mockery::mock('overload:SimplePie');
         $feedMock->shouldReceive('set_feed_url')->once();

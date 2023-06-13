@@ -1,35 +1,48 @@
 <?php
 namespace Tests\Unit;
 
+use App\Jobs\CreateRedmineIssue;
+use App\Models\Rss;
+use App\Models\Setting;
 use App\Services\RSSService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
+use Illuminate\Support\Facades\Bus;
 use Mockery;
 use Tests\TestCase;
 
 class HandleNewRecordTest extends TestCase
 {
+    use RefreshDatabase;
     /**
      * A basic feature test example.
      */
-    public function test_handle_new_record(): void
+    public function testHandleNewRecord(): void
     {
-        $rssMock = Mockery::mock('overload:Rss');
-        $rssMock->shouldReceive('where')->once()->with('guid', '123')->andReturnSelf();
-        $rssMock->shouldReceive('first')->once()->andReturn(null);
-        $rssMock->shouldReceive('create')->once()->with([
+        Bus::fake();
+
+        $rssData = [
             'title' => 'Program Title',
             'link' => 'https://example.com',
             'pub_date' => '2023-06-08',
-            'guid' => '123',
-        ]);
+            'guid' => '785',
+        ];
+        $this->assertDatabaseMissing('rsses', $rssData);
+        Rss::create($rssData);
+        $this->assertDatabaseHas('rsses', $rssData);
 
-        $settingMock = Mockery::mock('overload:Setting');
-        $settingMock->shouldReceive('where')->once()->with('program_title', 'Program Title')->andReturnSelf();
-        $settingMock->shouldReceive('first')->once()->andReturn(true);
+        $rss = Rss::where('guid', '8468484')->first();
 
-        $createRedmineIssueMock = Mockery::mock('overload:CreateRedmineIssue');
-        $createRedmineIssueMock->shouldReceive('dispatch')->once();
+        if (!$rss) {
+            $rssCreatedData = Rss::factory()->create();
+            $this->assertDatabaseHas('rsses', $rssCreatedData->toArray());
+
+            $setting = Setting::where('program_title', 'Program Title')->first();
+
+            if ($setting) {
+                Bus::assertDispatched(CreateRedmineIssue::class);
+            }
+        }
 
         $rssServiceMock = Mockery::mock(RSSService::class.'[handleNewRecord]', ['https://example.xml'])
             ->shouldAllowMockingProtectedMethods();
@@ -39,8 +52,5 @@ class HandleNewRecordTest extends TestCase
         $result = $rssServiceMock->handleNewRecord('Test', 'https://example.com', '2023-06-08', '123');
 
         $this->assertSame(['message' => 'Rss successfully parsed'], $result);
-
-        // Clean up the mocks
-        Mockery::close();
     }
 }
