@@ -9,10 +9,12 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Telegram\Bot\Api;
+use App\Models\Log as LogModel;
 
 class CreateRedmineIssue implements ShouldQueue
 {
@@ -42,9 +44,10 @@ class CreateRedmineIssue implements ShouldQueue
      * Execute the job.
      * @throws \Exception
      */
-    public function handle()
+    public function handle(Client $redmine)
     {
-        $redmine = new Client($this->redmineUrl, $this->apiKey);
+        $redmine->setRedmineUrl($this->redmineUrl);
+        $redmine->setApiKey($this->apiKey);
 
         $subject = Str::replace('[[SKIP]]', 'Не указано', (isset($this->data['subject']) ? $this->data['subject'] : null));
         $description = Str::replace('[[SKIP]]', 'Не указано', (isset($this->data['description']) ? $this->data['description'] : null));
@@ -78,11 +81,11 @@ class CreateRedmineIssue implements ShouldQueue
                         'text' => $message,
                     ]);
 
-                    Log::create([
+                    LogModel::create([
                         'redmine_task_url' => $redmineTaskUrl,
                         'telegram_message_id' => $telegramMessage->messageId,
                         'create_date' => $createdIssue->created_on,
-                        'sent_date' => $telegramMessage->date
+                        'sent_date' => Carbon::createFromTimestamp($telegramMessage->date)->toDateTimeString()
                     ]);
                 } catch (\Exception $e) {
                     throw new \Exception('Ошибка при отправке сообщений: ' . $e->getMessage(), 0);
@@ -91,7 +94,7 @@ class CreateRedmineIssue implements ShouldQueue
             } else return null;
         } catch (\Exception $e) {
             Storage::put('xml/' . date('Y-m-d_h-i-s') . '.xml', $redmine->getLastResponseBody());
-            Log::error($e);
+            Log::error('REDMINE SERVICE: Ошибка при создании задачи: ' . $e->getMessage());
             throw new \Exception('REDMINE SERVICE: Ошибка при создании задачи: ' . $e->getMessage(), 0);
         }
     }

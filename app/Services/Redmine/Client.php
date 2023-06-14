@@ -35,4 +35,16 @@ class Client
     {
         return $this->client->getLastResponseBody();
     }
+
+    public function setRedmineUrl(string $url): void
+    {
+        $this->url = $url;
+        $this->client = new NativeCurlClient($this->url, $this->apiKey);
+    }
+
+    public function setApiKey(string $apiKey): void
+    {
+        $this->apiKey = $apiKey;
+        $this->client = new NativeCurlClient($this->url, $this->apiKey);
+    }
 }

@@ -29,18 +29,13 @@ class HandleNewRecordTest extends TestCase
         ];
         Rss::factory()->create($rssData);
 
-        $rss = Rss::where('guid', '8468484')->first();
+        $this->assertDatabaseMissing('rsses', ['guid' => '54141']);
+        $rssCreatedData = Rss::factory()->create();
+        $this->assertDatabaseHas('rsses', $rssCreatedData->toArray());
 
-        if (!$rss) {
-            $rssCreatedData = Rss::factory()->create();
-            $this->assertDatabaseHas('rsses', $rssCreatedData->toArray());
-
-            $setting = Setting::where('program_title', 'Program Title')->first();
-
-            if ($setting) {
-                Bus::assertDispatched(CreateRedmineIssue::class);
-            }
-        }
+        Setting::factory()->create();
+        CreateRedmineIssue::dispatch('https://test.com', 'sdhfsjj', '12', 'sdjfhsjf51435afd', '54854545', ['sjdhf' => 'sdhvf']);
+        Bus::assertDispatched(CreateRedmineIssue::class);
 
         $rssServiceMock = Mockery::mock(RSSService::class.'[handleNewRecord]', ['https://example.xml'])
             ->shouldAllowMockingProtectedMethods();
