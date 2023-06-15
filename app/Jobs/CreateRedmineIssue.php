@@ -3,6 +3,7 @@
 namespace App\Jobs;
 
 use App\Services\Redmine\Client;
+use App\Services\Telegram\Telegram;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -13,7 +14,6 @@ use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
-use Telegram\Bot\Api;
 use App\Models\Log as LogModel;
 
 class CreateRedmineIssue implements ShouldQueue
@@ -44,7 +44,7 @@ class CreateRedmineIssue implements ShouldQueue
      * Execute the job.
      * @throws \Exception
      */
-    public function handle(Client $redmine)
+    public function handle(Client $redmine, Telegram $telegram)
     {
         $redmine->setRedmineUrl($this->redmineUrl);
         $redmine->setApiKey($this->apiKey);
@@ -75,7 +75,7 @@ class CreateRedmineIssue implements ShouldQueue
                 $message .= "Номер задачи: " . $redmineTaskId . "\n";
                 $message .= "URL задачи: " . $redmineTaskUrl;
                 try {
-                    $telegram = new Api($this->botToken);
+                    $telegram->setAccessToken($this->botToken);
                     $telegramMessage = $telegram->sendMessage([
                         'chat_id' => $this->chatId,
                         'text' => $message,
@@ -84,7 +84,7 @@ class CreateRedmineIssue implements ShouldQueue
                     LogModel::create([
                         'redmine_task_url' => $redmineTaskUrl,
                         'telegram_message_id' => $telegramMessage->messageId,
-                        'create_date' => $createdIssue->created_on,
+                        'create_date' => Carbon::createFromTimestamp($createdIssue->created_on)->toDateTimeString(),
                         'sent_date' => Carbon::createFromTimestamp($telegramMessage->date)->toDateTimeString()
                     ]);
                 } catch (\Exception $e) {
