@@ -13,11 +13,8 @@ class Client
     /**
      * @codeCoverageIgnore
      */
-    public function __construct($url, $apiKey)
+    public function __construct()
     {
-        $this->url = $url;
-        $this->apiKey = $apiKey;
-        $this->client = new NativeCurlClient($this->url, $this->apiKey);
     }
 
     /**
@@ -25,6 +22,8 @@ class Client
      */
     public function getApi(string $name): mixed
     {
+        $this->client = new NativeCurlClient($this->url, $this->apiKey);
+
         return $this->client->getApi($name);
     }
 
@@ -39,12 +38,10 @@ class Client
     public function setRedmineUrl(string $url): void
     {
         $this->url = $url;
-        $this->client = new NativeCurlClient($this->url, $this->apiKey);
     }
 
     public function setApiKey(string $apiKey): void
     {
         $this->apiKey = $apiKey;
-        $this->client = new NativeCurlClient($this->url, $this->apiKey);
     }
 }

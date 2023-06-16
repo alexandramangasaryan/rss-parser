@@ -14,14 +14,13 @@ class Telegram
     /**
      * @throws \Telegram\Bot\Exceptions\TelegramSDKException
      */
-    public function __construct($accessToken)
+    public function __construct()
     {
-        $this->telegramBot = new Api($accessToken);
-        $this->accessToken = $accessToken;
     }
 
     public function sendMessage(array $params)
     {
+        $this->telegramBot = new Api($this->accessToken);
         $response = $this->telegramBot->post('sendMessage', $params);
 
         return new Message($response->getDecodedBody());
