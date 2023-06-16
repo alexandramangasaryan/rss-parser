@@ -6,6 +6,7 @@ use App\Jobs\CreateRedmineIssue;
 use App\Models\Log;
 use App\Models\Rss;
 use App\Models\Setting;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use SimplePie\Item;
@@ -55,7 +56,7 @@ class RSSService
             Rss::create([
                 'title' => $programTitle,
                 'link' => $link,
-                'pub_date' => $pubDate,
+                'pub_date' => Carbon::createFromTimestamp($pubDate)->toDateTimeString(),
                 'guid' => $guid,
             ]);
 
