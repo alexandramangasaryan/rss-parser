@@ -15,9 +15,9 @@ class Client
      */
     public function __construct($url, $apiKey)
     {
-        $this->client = new NativeCurlClient($url, $apiKey);
         $this->url = $url;
         $this->apiKey = $apiKey;
+        $this->client = new NativeCurlClient($this->url, $this->apiKey);
     }
 
     /**

@@ -44,10 +44,13 @@ class CreateRedmineIssue implements ShouldQueue
      * Execute the job.
      * @throws \Exception
      */
-    public function handle(Client $redmine, Telegram $telegram)
+    public function handle()
     {
+        $redmine = new Client($this->redmineUrl, $this->apiKey);
         $redmine->setRedmineUrl((string)$this->redmineUrl);
         $redmine->setApiKey((string)$this->apiKey);
+
+        $telegram = new Telegram($this->botToken);
 
         $subject = Str::replace('[[SKIP]]', 'Не указано', (isset($this->data['subject']) ? $this->data['subject'] : null));
         $description = Str::replace('[[SKIP]]', 'Не указано', (isset($this->data['description']) ? $this->data['description'] : null));
