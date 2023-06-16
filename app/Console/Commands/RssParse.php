@@ -26,7 +26,7 @@ class RssParse extends Command
      */
     public function handle()
     {
-        $feedUrl = getenv('FEED_URL');
+        $feedUrl = config('app.rss_feed_url');
         $rssService = new RSSService($feedUrl);
 
         $rssService->processRSS();

@@ -185,4 +185,7 @@ return [
         // 'Example' => App\Facades\Example::class,
     ])->toArray(),
 
+
+    'rss_feed_url' => env('FEED_URL'),
+
 ];

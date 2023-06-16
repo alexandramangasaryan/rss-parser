@@ -46,8 +46,8 @@ class CreateRedmineIssue implements ShouldQueue
      */
     public function handle(Client $redmine, Telegram $telegram)
     {
-        $redmine->setRedmineUrl($this->redmineUrl);
-        $redmine->setApiKey($this->apiKey);
+        $redmine->setRedmineUrl((string)$this->redmineUrl);
+        $redmine->setApiKey((string)$this->apiKey);
 
         $subject = Str::replace('[[SKIP]]', 'Не указано', (isset($this->data['subject']) ? $this->data['subject'] : null));
         $description = Str::replace('[[SKIP]]', 'Не указано', (isset($this->data['description']) ? $this->data['description'] : null));
