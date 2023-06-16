@@ -43,7 +43,7 @@ class RSSService
     protected function handleNewRecord($title, $link, $pubDate, $guid)
     {
         $substrTitle = strstr($title, '"');
-        $programTitle = substr($substrTitle, 0, strrpos ($substrTitle, '"'));
+        $programTitle = substr($substrTitle, 1, strrpos ($substrTitle, '"') - 1);
 
         $startPos = strpos($title, 'версия ') + strlen('версия ');
         $endPos = strpos($title, '"', $startPos);
