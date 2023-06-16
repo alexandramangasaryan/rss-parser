@@ -84,8 +84,8 @@ class CreateRedmineIssue implements ShouldQueue
                     LogModel::create([
                         'redmine_task_url' => $redmineTaskUrl,
                         'telegram_message_id' => $telegramMessage->messageId,
-                        'create_date' => Carbon::createFromTimestamp($createdIssue->created_on)->toDateTimeString(),
-                        'sent_date' => Carbon::createFromTimestamp($telegramMessage->date)->toDateTimeString()
+                        'sent_date' => Carbon::parse($telegramMessage->date)->toDateTimeString(),
+                        'create_date' => Carbon::parse($createdIssue->created_on)->toDateTimeString(),
                     ]);
                 } catch (\Exception $e) {
                     throw new \Exception('Ошибка при отправке сообщений: ' . $e->getMessage(), 0);

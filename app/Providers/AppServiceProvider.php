@@ -12,9 +12,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        $this->app->bind(Client::class, function ($url, $apiKey) {
-            return new Client($url, $apiKey);
-        });
+
     }
 
     /**
