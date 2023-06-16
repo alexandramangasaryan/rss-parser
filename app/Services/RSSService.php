@@ -56,7 +56,7 @@ class RSSService
             Rss::create([
                 'title' => $programTitle,
                 'link' => $link,
-                'pub_date' => Carbon::createFromFormat('D, d M Y H:i:s O', $pubDate)->toDateTimeString(),
+                'pub_date' => Carbon::parse($pubDate)->toDateTimeString(),
                 'guid' => $guid,
             ]);
 
