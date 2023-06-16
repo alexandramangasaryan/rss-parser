@@ -44,6 +44,12 @@ class RSSService
         $substrTitle = strstr($title, '"');
         $programTitle = substr($substrTitle, 0, strrpos ($substrTitle, '"'));
 
+        $startPos = strpos($title, 'версия ') + strlen('версия ');
+        $endPos = strpos($title, '"', $startPos);
+        $version = substr($title, $startPos, $endPos - $startPos);
+
+        $redmineProgramTitle = $programTitle . ' ' . $version;
+
         $existingRss = Rss::where('guid', $guid)->first();
         if (!$existingRss) {
             Rss::create([
@@ -57,7 +63,10 @@ class RSSService
             if ($settingExists) {
                 $data = [];
 
-                $data['subject'] = $title;
+                $data['subject'] = $redmineProgramTitle;
+                $data['description'] = $redmineProgramTitle . "\n";
+                $data['description'] .= $link . "\n";
+                $data['description'] .= $pubDate . "\n";
                 CreateRedmineIssue::dispatch(
                     $settingExists->redmine_url,
                     $settingExists->redmine_api_key,
