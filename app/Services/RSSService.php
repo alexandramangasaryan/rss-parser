@@ -49,7 +49,7 @@ class RSSService
         $endPos = strpos($title, '"', $startPos);
         $version = substr($title, $startPos, $endPos - $startPos);
 
-        $redmineProgramTitle = $programTitle . ' ' . $version;
+        $redmineProgramTitle = $programTitle . ' .' . $version;
 
         $existingRss = Rss::where('guid', $guid)->first();
         if (!$existingRss) {
