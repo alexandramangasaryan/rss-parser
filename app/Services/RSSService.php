@@ -33,7 +33,7 @@ class RSSService
 
         foreach ($feed->get_items() as $item) {
             $title = $item->get_title();
-            $link = $item->get_link();
+            $link = htmlspecialchars_decode($item->get_link());
             $pubDate = $item->get_date();
             $guid = $item->get_id();
             $this->handleNewRecord($title, $link, $pubDate, $guid);
