@@ -1,92 +1,133 @@
+
 # Rss Parser
+Проект "RSS парсер" – это приложение, разработанное с использованием фреймворка Laravel, предназначенное для автоматического парсинга данных из указанных RSS-лент и обработки полученной информации.
+Основная цель проекта заключается в сборе данных о новых записях из RSS-лент и дальнейшей обработке этих данных для создания задач в системе управления проектами Redmine и отправки уведомлений в Telegram.
 
+# Технические детали
 
+- Приложение разработано с использованием фреймворка Laravel, что обеспечивает гибкость, безопасность и удобство разработки.
+- Для управления зависимостями и окружением проекта используется Docker (sail).
+- Парсинг RSS-лент выполняется с использованием соответствующих библиотек или компонентов в Laravel.
+- Взаимодействие с базой данных, а также создание задач в Redmine и отправка уведомлений в Telegram осуществляется с использованием соответствующих API и библиотек.
 
-## Getting started
+## Установка проекта
 
-To make it easy for you to get started with GitLab, here's a list of recommended next steps.
+### 1. Установка Docker
 
-Already a pro? Just edit this README.md and make it your own. Want to make it easy? [Use the template at the bottom](#editing-this-readme)!
+- Установите [Docker Desktop][link-docker].
+- Если у вас Windows, убедитесь, что подсистема Windows для Linux 2 (WSL2) установлена и включена. Информацию о том, как установить и включить WSL2, можно найти в [документации][link-wsl].
+- Установите и запустите Терминал (например, [Windows Powershell][link-powershell])
 
-## Add your files
+### 2. Подключение GIT
 
-- [ ] [Create](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#create-a-file) or [upload](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#upload-a-file) files
-- [ ] [Add files using the command line](https://docs.gitlab.com/ee/gitlab-basics/add-file.html#add-a-file-using-the-command-line) or push an existing Git repository with the following command:
+- Создайте директорию для проекта, например `rssParser`, и перейдите в нее.
+- Клонируйте репозиторий (обратите внимание на точку в конце, она обозначает "клонировать в текущую директорию"):
 
 ```
-cd existing_repo
-git remote add origin https://git.anmarto.ru/man/rss-parser.git
-git branch -M main
-git push -uf origin main
+git clone git@git.anmarto.ru:man/rss-parser.git .
 ```
 
-## Integrate with your tools
+### 3. Работа с GIT
 
-- [ ] [Set up project integrations](https://git.anmarto.ru/man/rss-parser/-/settings/integrations)
+- В git проекта основная ветка:
+    - **master** - деплой из этой ветки происходит на стенд `production` (боевой сайт)
+- Все доработки производятся в новой ветке, наследованной от `master`, название новой ветки `ticket/1234`, где `1234` - номер задачи в redmine.
+### 4. Обновление проекта из GIT
 
-## Collaborate with your team
+- После клонирования проекта у вас должна появиться ветка `master`, связанная с удаленной веткой `origin/master`
+- Убедитесь, что вы находитесь в ветке `master` (например, если до этого работали с другой веткой)
+- Получите последние изменения (`git pull`)
+- Скопируйте файл `.env.example`, переименуйте его в `.env`
+- В файле .env добавьте переменную `RSS_FEEDS`
+- Эта переменная должна содержать URL-адрес RSS-ленты. Пример:
+```
+RSS_FEEDS=https://example.com/rss/feed1
+```
+- Сохраните изменения в файле `.env`
+- Запустите сборку docker:
+```
+./vendor/bin/sail up --build -d
+```
 
-- [ ] [Invite team members and collaborators](https://docs.gitlab.com/ee/user/project/members/)
-- [ ] [Create a new merge request](https://docs.gitlab.com/ee/user/project/merge_requests/creating_merge_requests.html)
-- [ ] [Automatically close issues from merge requests](https://docs.gitlab.com/ee/user/project/issues/managing_issues.html#closing-issues-automatically)
-- [ ] [Enable merge request approvals](https://docs.gitlab.com/ee/user/project/merge_requests/approvals/)
-- [ ] [Automatically merge when pipeline succeeds](https://docs.gitlab.com/ee/user/project/merge_requests/merge_when_pipeline_succeeds.html)
+### 5. Установка зависимостей composer
 
-## Test and Deploy
+Установите соответствующие зависимости следующей командой:
 
-Use the built-in continuous integration in GitLab.
+```
+./vendor/bin/sail composer install
+```
 
-- [ ] [Get started with GitLab CI/CD](https://docs.gitlab.com/ee/ci/quick_start/index.html)
-- [ ] [Analyze your code for known vulnerabilities with Static Application Security Testing(SAST)](https://docs.gitlab.com/ee/user/application_security/sast/)
-- [ ] [Deploy to Kubernetes, Amazon EC2, or Amazon ECS using Auto Deploy](https://docs.gitlab.com/ee/topics/autodevops/requirements.html)
-- [ ] [Use pull-based deployments for improved Kubernetes management](https://docs.gitlab.com/ee/user/clusters/agent/)
-- [ ] [Set up protected environments](https://docs.gitlab.com/ee/ci/environments/protected_environments.html)
+### 6. Создание таблиц в базе данных
 
-***
+- Выполните миграции Laravel, чтобы создать необходимые таблицы в базе данных
+- В случае возникновения проблем с миграциями (например, если миграции были нужна уже наполненная БД, и она выдала ошибку), просто сделайте импорт базы данных вручную
 
-# Editing this README
+```
+./vendor/bin/sail artisan migrate
+```
+### 7. Запуск парсера
 
-When you're ready to make this README your own, just edit this file and use the handy template below (or feel free to structure it however you want - this is just a starting point!). Thank you to [makeareadme.com](https://www.makeareadme.com/) for this template.
+- Для запуска парсера выполните команду:
 
-## Suggestions for a good README
-Every project is different, so consider which of these sections apply to yours. The sections used in the template are suggestions for most open source projects. Also keep in mind that while a README can be too long and detailed, too long is better than too short. If you think your README is too long, consider utilizing another form of documentation rather than cutting out information.
+```
+./vendor/bin/sail artisan rss:parse
+```
 
-## Name
-Choose a self-explaining name for your project.
+- Запуск обработчика очереди задач:
 
-## Description
-Let people know what your project can do specifically. Provide context and add a link to any reference visitors might be unfamiliar with. A list of Features or a Background subsection can also be added here. If there are alternatives to your project, this is a good place to list differentiating factors.
+```
+./vendor/bin/sail artisan queue:listen
+```
 
-## Badges
-On some READMEs, you may see small images that convey metadata, such as whether or not all the tests are passing for the project. You can use Shields to add some to your README. Many services also have instructions for adding a badge.
+### 8. Пример получения свежих изменений
 
-## Visuals
-Depending on what you are making, it can be a good idea to include screenshots or even a video (you'll frequently see GIFs rather than actual videos). Tools like ttygif can help, but check out Asciinema for a more sophisticated method.
+```
+git checkout master
+git pull
+./vendor/bin/sail composer install
+./vendor/bin/sail artisan migrate
+./vendor/bin/sail artisan optimize:clear
+```
 
-## Installation
-Within a particular ecosystem, there may be a common way of installing things, such as using Yarn, NuGet, or Homebrew. However, consider the possibility that whoever is reading your README is a novice and would like more guidance. Listing specific steps helps remove ambiguity and gets people to using your project as quickly as possible. If it only runs in a specific context like a particular programming language version or operating system or has dependencies that have to be installed manually, also add a Requirements subsection.
+### 9. Сервер:
+```
+IP-адрес: 185.103.132.52
+```
 
-## Usage
-Use examples liberally, and show the expected output if you can. It's helpful to have inline the smallest example of usage that you can demonstrate, while providing links to more sophisticated examples if they are too long to reasonably include in the README.
+После выполнения этих шагов проект "RSS парсер" должен быть успешно установлен и запущен с помощью Laravel Sail.
+Приложение будет периодически парсить указанные RSS-ленты, обрабатывать данные и создавать задачи в Redmine и уведомления в Telegram.
 
-## Support
-Tell people where they can go to for help. It can be any combination of an issue tracker, a chat room, an email address, etc.
+### Настройка отслеживания конкретных данных
+Чтобы отслеживать конкретные данные из своих RSS-лент, выполните следующие шаги:
 
-## Roadmap
-If you have ideas for releases in the future, it is a good idea to list them in the README.
+### 1. Откройте таблицу "settings"
+- В приложении "RSS парсер" есть таблица "settings", которая содержит основные настройки для отслеживания данных.
+### 2. Добавьте новые данные
+- Для каждой RSS-ленты, которую вы хотите отслеживать, добавьте следующие данные в таблицу "settings":
+    - **Название:** Укажите название программы из RSS-ленты, чтобы легко идентифицировать ее в дальнейшем.
+    - **Redmine URL:** Укажите URL-адрес вашего Redmine-проекта, куда будут создаваться задачи на основе данных из RSS-ленты.
+    - **Redmine API Key:** Укажите ваш API ключ Redmine для возможности создания задач.
+    - **Project ID:** Укажите идентификатор проекта в Redmine, куда будут создаваться задачи (может быть числовым значением или строкой).
+    - **Telegram Chat ID:** Укажите идентификатор чата в Telegram, куда будут отправляться уведомления.
+    - **Telegram Bot Token:** Укажите токен вашего Telegram-бота для возможности отправки уведомлений.
+### 3. Сохраните изменения
+- Убедитесь, что все данные правильно заполнены, и сохраните изменения в таблице "settings".
+  
+После выполнения этих шагов, парсер будет отслеживать конкретные программы из указанных RSS-лент и автоматически создавать задачи в Redmine и отправлять уведомления в указанный чат в Telegram.
 
-## Contributing
-State if you are open to contributions and what your requirements are for accepting them.
+### Список полезных ссылок / документация
 
-For people who want to make changes to your project, it's helpful to have some documentation on how to get started. Perhaps there is a script that they should run or some environment variables that they need to set. Make these steps explicit. These instructions could also be useful to your future self.
+- [Документация Laravel][link-laravel]
+- [Docker][link-docker]
+- [WSL][link-wsl]
+- [Node.js][link-node]
 
-You can also document commands to lint the code or run tests. These steps help to ensure high code quality and reduce the likelihood that the changes inadvertently break something. Having instructions for running tests is especially helpful if it requires external setup, such as starting a Selenium server for testing in a browser.
 
-## Authors and acknowledgment
-Show your appreciation to those who have contributed to the project.
+[link-laravel]: https://laravel.com/docs
+[link-docker]: https://www.docker.com/products/docker-desktop
+[link-wsl]: https://docs.microsoft.com/ru-ru/windows/wsl/install-win10
+[link-powershell]: https://apps.microsoft.com/store/detail/windows-terminal/9N0DX20HK701
+[link-node]: https://nodejs.org/
 
-## License
-For open source projects, say how it is licensed.
-
-## Project status
-If you have run out of energy or time for your project, put a note at the top of the README saying that development has slowed down or stopped completely. Someone may choose to fork your project or volunteer to step in as a maintainer or owner, allowing your project to keep going. You can also make an explicit request for maintainers.
+После выполнения этих шагов проект "RSS парсер" должен быть успешно установлен и запущен с помощью Laravel Sail.
+Приложение будет периодически парсить указанные RSS-ленты, обрабатывать данные и создавать задачи в Redmine и уведомления в Telegram.
