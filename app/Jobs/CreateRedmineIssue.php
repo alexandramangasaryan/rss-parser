@@ -71,7 +71,7 @@ class CreateRedmineIssue implements ShouldQueue
                 $redmineTaskId = $createdIssue->id;
                 $redmineTaskUrl = $this->redmineUrl . '/issues/' . $redmineTaskId;
 
-                $message = $subject."\n\n";
+                $message = $subject."\n";
                 $message .= "Номер задачи: " . $redmineTaskId . "\n";
                 $message .= "URL задачи: " . $redmineTaskUrl;
                 try {
