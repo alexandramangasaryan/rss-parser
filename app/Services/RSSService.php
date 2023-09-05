@@ -12,6 +12,7 @@ use SimplePie\SimplePie;
 class RSSService
 {
     protected $feedUrl;
+    private $processedGuids = [];
 
     public function __construct($feedUrl)
     {
@@ -33,7 +34,10 @@ class RSSService
             $link = htmlspecialchars_decode($item->get_link());
             $pubDate = $item->get_date();
             $guid = $item->get_id();
-            $this->handleNewRecord($title, $link, $pubDate, $guid);
+            if (!in_array($guid, $this->processedGuids)) {
+                $this->handleNewRecord($title, $link, $pubDate, $guid);
+                $this->processedGuids[] = $guid; // Mark this item as processed
+            }
         }
     }
 
