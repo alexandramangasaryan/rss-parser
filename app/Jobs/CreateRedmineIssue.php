@@ -52,6 +52,9 @@ class CreateRedmineIssue implements ShouldQueue
         $subject = Str::replace('[[SKIP]]', 'Не указано', (isset($this->data['subject']) ? $this->data['subject'] : null));
         $description = Str::replace('[[SKIP]]', 'Не указано', (isset($this->data['description']) ? $this->data['description'] : null));
         $customFields = isset($this->data['custom_fields']) ? $this->data['custom_fields'] : [];
+        Log::info('$subject: ' . $subject);
+        Log::info('$description: ' . $description);
+        Log::info('$customFields: ' . json_encode($customFields));
         try {
             $createdIssue = $redmine->getApi('issue')->create([
                 'project_id' => $this->projectId,
