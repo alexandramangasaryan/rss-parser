@@ -53,7 +53,7 @@ class RSSService
         $redmineProgramTitle = $programTitle . ' .' . $version;
         Log::info('$guid: ' . $guid);
 
-        $existingRss = Rss::where('guid', $guid)->first();
+        $existingRss = Rss::where('guid', $guid)->lockForUpdate()->first();
 
         if (!$existingRss) {
             Log::info('rss does not exist in db table');
