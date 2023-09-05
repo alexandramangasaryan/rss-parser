@@ -51,12 +51,10 @@ class RSSService
         $version = substr($title, $startPos, $endPos - $startPos);
 
         $redmineProgramTitle = $programTitle . ' .' . $version;
-        Log::info('$guid: ' . $guid);
 
         $existingRss = Rss::where('guid', $guid)->lockForUpdate()->first();
 
         if (!$existingRss) {
-            Log::info('rss does not exist in db table');
             Rss::create([
                 'title' => $programTitle,
                 'link' => $link,
@@ -67,14 +65,12 @@ class RSSService
             $settingExists = Setting::where('program_title', $programTitle)->first();
 
             if ($settingExists) {
-                Log::info('setting exists');
                 $data = [];
 
                 $data['subject'] = $redmineProgramTitle;
                 $data['description'] = $redmineProgramTitle . "\n";
                 $data['description'] .= $link . "\n";
                 $data['description'] .= $pubDate . "\n";
-                Log::info('dispatch CreateRedmineIssue');
                 CreateRedmineIssue::dispatch(
                     $settingExists->redmine_url,
                     $settingExists->redmine_api_key,
